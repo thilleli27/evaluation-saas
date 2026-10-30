@@ -1,0 +1,149 @@
+@use "sass:map";
+@use "sass:list";
+@use "variables" as *;
+@use "theme" as *;
+
+// =============================================================
+// theme-value() : renvoie la valeur d'une clé dans un thème via map.get()
+// Accepte aussi une valeur composée dont le DERNIER élément est la clé :
+//   2px 2px 10px shadow  →  2px 2px 10px rgba(0, 0, 0, 0.1)
+// =============================================================
+@function theme-value($theme, $value) {
+  $key: list.nth($value, -1);
+
+  @if not map.has-key($theme, $key) {
+    @error "Clé de thème inconnue : '#{$key}'.";
+  }
+
+  @if list.length($value) == 1 {
+    @return map.get($theme, $key);
+  }
+
+  $result: ();
+  @for $i from 1 to list.length($value) {
+    $result: list.append($result, list.nth($value, $i), space);
+  }
+  @return list.append($result, map.get($theme, $key), space);
+}
+
+// =============================================================
+// themed() : applique les couleurs des deux thèmes
+//
+//   $props : map « propriété CSS: clé du thème »
+//   $self  : true si la classe .dark-mode est posée sur l'élément
+//            lui-même (cas du body), false s'il est un descendant
+//
+//   @include themed((background-color: card-bg, color: card-text));
+//
+// À placer APRÈS les déclarations fixes d'une règle pour que le
+// CSS compilé ne répète pas le sélecteur.
+// =============================================================
+@mixin themed($props, $self: false) {
+  // Thème clair (par défaut)
+  @each $property, $value in $props {
+    #{$property}: theme-value($light-theme, $value);
+  }
+
+  // Thème sombre
+  $dark-selector: ".dark-mode &";
+  @if $self {
+    $dark-selector: "&.dark-mode";
+  }
+
+  #{$dark-selector} {
+    @each $property, $value in $props {
+      #{$property}: theme-value($dark-theme, $value);
+    }
+  }
+}
+
+// =============================================================
+// Transition commune (une ou plusieurs propriétés)
+//   @include transition(background-color, color);
+// =============================================================
+@mixin transition($properties...) {
+  $list: ();
+  @each $property in $properties {
+    $list: list.append($list, $property $transition-duration $transition-easing, comma);
+  }
+  transition: $list;
+}
+
+// =============================================================
+// Boutons
+//   button-base()            : forme commune à tous les boutons
+//   button-variant($variant) : couleurs d'une variante du thème
+//   button($variant, ...)    : les deux à la fois
+//
+// Une variante X utilise les clés X, X-hover et on-X du thème.
+//   @include button;                 → bouton primaire
+//   @include button(secondary);      → bouton secondaire
+//   @include button-variant(secondary); → modificateur seul
+// =============================================================
+@mixin button-base($padding: $button-padding, $radius: $border-radius) {
+  display: inline-block;
+  padding: $padding;
+  border: none;
+  border-radius: $radius;
+  font-family: inherit;
+  font-size: $font-size-base;
+  font-weight: $font-weight-bold;
+  cursor: pointer;
+  @include transition(background-color, color);
+}
+
+@mixin button-variant($variant: primary) {
+  @include themed((
+    background-color: $variant,
+    color: on-#{$variant},
+  ));
+
+  &:hover {
+    @include themed((background-color: #{$variant}-hover));
+  }
+
+  &:focus-visible {
+    outline: $focus-outline-width solid;
+    outline-offset: $focus-outline-width;
+    @include themed((outline-color: $variant));
+  }
+}
+
+@mixin button($variant: primary, $padding: $button-padding, $radius: $border-radius) {
+  @include button-base($padding, $radius);
+  @include button-variant($variant);
+}
+
+// =============================================================
+// Cartes
+// Chaque couleur est une clé du thème, donc facile à surcharger :
+//   @include card;                                 → carte standard
+//   @include card($border: primary);               → bordure colorée
+//   @include card($bg: secondary, $text: on-secondary, $shadow: false);
+// =============================================================
+@mixin card(
+  $bg: card-bg,
+  $text: card-text,
+  $border: card-border,
+  $padding: $card-padding,
+  $radius: $border-radius-lg,
+  $shadow: true
+) {
+  padding: $padding;
+  border-width: $border-width;
+  border-style: solid;
+  border-radius: $radius;
+  @include transition(background-color, color, border-color, box-shadow);
+
+  $colors: (
+    background-color: $bg,
+    color: $text,
+    border-color: $border,
+  );
+
+  @if $shadow {
+    $colors: map.set($colors, box-shadow, $card-shadow-offset shadow);
+  }
+
+  @include themed($colors);
+}

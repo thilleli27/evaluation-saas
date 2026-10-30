@@ -1,0 +1,74 @@
+@use "sass:map";
+
+// =============================================================
+// Thèmes clair / sombre
+// Les deux maps doivent contenir exactement les mêmes clés.
+// =============================================================
+
+$light-theme: (
+  // Page
+  bg: #ffffff,
+  text: #000000,
+
+  // Couleurs de marque
+  primary: #3498db,
+  primary-hover: #2980b9,
+  on-primary: #ffffff,
+  secondary: #2c3e50,
+  secondary-hover: #1f2d3a,
+  on-secondary: #ffffff,
+  accent: #f1c40f,
+
+  // Header / navigation
+  header-bg: #3498db,
+  header-text: #ffffff,
+  nav-bg: #2c3e50,
+  nav-text: #ffffff,
+  nav-link-hover: #f1c40f,
+
+  // Cartes
+  card-bg: #ffffff,
+  card-text: #000000,
+  card-border: #e6e6e6,
+  shadow: rgba(0, 0, 0, 0.1),
+);
+
+$dark-theme: (
+  // Page
+  bg: #222222,
+  text: #ffffff,
+
+  // Couleurs de marque
+  primary: #5dade2,
+  primary-hover: #3498db,
+  on-primary: #111111,
+  secondary: #4a6278,
+  secondary-hover: #5d7891,
+  on-secondary: #ffffff,
+  accent: #f4d03f,
+
+  // Header / navigation
+  header-bg: #1f4e79,
+  header-text: #ffffff,
+  nav-bg: #151d26,
+  nav-text: #e6e6e6,
+  nav-link-hover: #f4d03f,
+
+  // Cartes
+  card-bg: #2e2e2e,
+  card-text: #f0f0f0,
+  card-border: #3d3d3d,
+  shadow: rgba(0, 0, 0, 0.5),
+);
+
+// Garde-fou : les deux thèmes doivent avoir les mêmes clés
+@each $key, $value in $light-theme {
+  @if not map.has-key($dark-theme, $key) {
+    @error "La clé '#{$key}' existe dans $light-theme mais pas dans $dark-theme.";
+  }
+}
+@each $key, $value in $dark-theme {
+  @if not map.has-key($light-theme, $key) {
+    @error "La clé '#{$key}' existe dans $dark-theme mais pas dans $light-theme.";
+  }
+}

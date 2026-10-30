@@ -1,0 +1,49 @@
+@use "variables" as *;
+@use "mixins" as *;
+
+.header {
+  padding: $spacing-md;
+  text-align: center;
+  @include transition(background-color, color);
+  @include themed((
+    background-color: header-bg,
+    color: header-text,
+  ));
+
+  h1 {
+    font-size: $font-size-h1;
+    margin-bottom: $spacing-xs;
+  }
+}
+
+.nav {
+  padding: $nav-padding;
+  text-align: center;
+  @include transition(background-color);
+  @include themed((background-color: nav-bg));
+
+  ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+    display: flex;
+    justify-content: center;
+
+    li {
+      margin: 0 $spacing-sm;
+
+      a {
+        text-decoration: none;
+        font-weight: $font-weight-bold;
+        padding: $nav-link-padding;
+        @include transition(color);
+        @include themed((color: nav-text));
+
+        &:hover,
+        &:focus-visible {
+          @include themed((color: nav-link-hover));
+        }
+      }
+    }
+  }
+}

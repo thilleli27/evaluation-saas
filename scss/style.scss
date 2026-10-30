@@ -1,0 +1,58 @@
+@use "variables" as *;
+@use "mixins" as *;
+@use "header";
+
+// =============================================================
+// Base
+// =============================================================
+body {
+  font-family: $font-family-base;
+  margin: 0;
+  @include transition(background-color, color);
+  // .dark-mode est posée sur le body lui-même par script.js → $self: true
+  @include themed((
+    background-color: bg,
+    color: text,
+  ), $self: true);
+}
+
+.container {
+  max-width: $container-max-width;
+  margin: 0 auto;
+  padding: $container-padding;
+}
+
+// =============================================================
+// Boutons
+// =============================================================
+.button {
+  @include button(primary);
+}
+
+// Variante prête pour de futurs boutons : <button class="button button--secondary">
+.button--secondary {
+  @include button-variant(secondary);
+}
+
+// =============================================================
+// Cartes
+// =============================================================
+.card {
+  margin-top: $spacing-sm;
+  text-align: center;
+  @include card;
+}
+
+// Variante prête pour de futures cartes : <div class="card card--highlight">
+.card--highlight {
+  @include themed((border-color: primary));
+}
+
+// =============================================================
+// Accessibilité : pas d'animation si l'utilisateur le demande
+// =============================================================
+@media (prefers-reduced-motion: reduce) {
+  * {
+    transition: none !important;
+  }
+}
